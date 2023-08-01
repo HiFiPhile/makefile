@@ -232,23 +232,6 @@ ifneq ($(shell which nproc 2>/dev/null),)
 endif
 
 
-#### OS Specific Values ####
-override _uname := $(shell uname -s | tr A-Z a-z)
-override _windows := $(filter cygwin% mingw% msys%,$(_uname))
-override _linux := $(filter linux%,$(_uname))
-override _pic_flag := $(if $(_windows),,-fPIC)
-override _libprefix := $(if $(filter cygwin%,$(_uname)),cyg,$(if $(filter msys%,$(_uname)),msys-,lib))
-override _libext := .$(if $(_windows),dll,so)
-override _binext := $(if $(_windows),.exe)
-ifneq ($(_windows),)
-  $(foreach x,$(filter WINDOWS.%,$(.VARIABLES)),\
-    $(eval override $(patsubst WINDOWS.%,%,$x) = $(value $x)))
-else ifneq ($(_linux),)
-  $(foreach x,$(filter LINUX.%,$(.VARIABLES)),\
-    $(eval override $(patsubst LINUX.%,%,$x) = $(value $x)))
-endif
-
-
 #### Terminal Output ####
 # _fg1 - binary/library built
 # _fg2 - warning or removal notice
@@ -356,6 +339,23 @@ ifneq ($$(filter-out $$(_cxx_stds) $$(_c_stds),$$($1)),)
   $$(error $$(_msgErr)$1: unknown '$$(filter-out $$(_cxx_stds) $$(_c_stds),$$($1))'$$(_end))
 endif
 endef
+
+
+#### OS Specific Values ####
+override _uname := $(shell uname -s | tr A-Z a-z)
+override _windows := $(filter cygwin% mingw% msys%,$(_uname))
+override _linux := $(filter linux%,$(_uname))
+override _pic_flag := $(if $(_windows),,-fPIC)
+override _libprefix := $(if $(filter cygwin%,$(_uname)),cyg,$(if $(filter msys%,$(_uname)),msys-,lib))
+override _libext := .$(if $(_windows),dll,so)
+override _binext := $(if $(_windows),$(if $(_cross_compile,,.exe)))
+ifneq ($(_windows),)
+  $(foreach x,$(filter WINDOWS.%,$(.VARIABLES)),\
+    $(eval override $(patsubst WINDOWS.%,%,$x) = $(value $x)))
+else ifneq ($(_linux),)
+  $(foreach x,$(filter LINUX.%,$(.VARIABLES)),\
+    $(eval override $(patsubst LINUX.%,%,$x) = $(value $x)))
+endif
 
 
 #### Package Handling ####
